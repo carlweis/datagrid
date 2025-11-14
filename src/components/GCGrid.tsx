@@ -22,9 +22,13 @@ export interface GCGridProps<T> {
   onAdd?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  tabs?: Array<{ label: string; value: string }>;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 const PRIMARY_BLUE = '#015FA3';
+const PRIMARY_BUTTON = '#0062AC';
 
 export function GCGrid<T extends Record<string, any>>({
   data,
@@ -39,9 +43,13 @@ export function GCGrid<T extends Record<string, any>>({
   onAdd,
   onEdit,
   onDelete,
+  tabs,
+  activeTab,
+  onTabChange,
 }: GCGridProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(pageSize);
+  const [searchFocused, setSearchFocused] = useState(false);
 
   // Default getRowId implementation with safety checks
   const getRowId = useCallback(
@@ -146,7 +154,8 @@ export function GCGrid<T extends Record<string, any>>({
             {onAdd && (
               <button
                 onClick={onAdd}
-                className="rounded bg-[#015FA3] px-4 py-2 text-sm font-medium text-white hover:bg-[#014a82]"
+                className="rounded px-4 py-2 text-sm font-medium text-white"
+                style={{ backgroundColor: PRIMARY_BUTTON }}
               >
                 + Add Constituent
               </button>
@@ -155,43 +164,76 @@ export function GCGrid<T extends Record<string, any>>({
         </div>
       </div>
 
+      {/* Tabs Section */}
+      {tabs && tabs.length > 0 && (
+        <div className="border-b border-gray-300 bg-white px-6">
+          <div className="flex gap-6">
+            {tabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => onTabChange?.(tab.value)}
+                className={`relative border-b-2 pb-3 pt-4 text-sm font-medium transition-colors ${
+                  activeTab === tab.value
+                    ? 'border-[#015FA3] text-[#015FA3]'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search Bar */}
       <div className="border-b border-gray-300 px-6 py-3">
-        <div className="relative">
-          <svg
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className="flex items-center justify-end">
+          <div
+            className={`relative transition-all duration-200 ${
+              searchFocused ? 'w-full' : 'w-64'
+            }`}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-          <input
-            type="search"
-            placeholder="Search"
-            className="w-full rounded border border-gray-300 py-2 pl-10 pr-10 text-sm focus:border-[#015FA3] focus:outline-none focus:ring-1 focus:ring-[#015FA3]"
-          />
-          <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-          </button>
+            <input
+              type="search"
+              placeholder="Search"
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              className="w-full rounded border border-gray-300 py-2 pl-10 pr-10 text-sm focus:border-[#015FA3] focus:outline-none focus:ring-1 focus:ring-[#015FA3]"
+            />
+            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Selection Status and Actions Bar */}
+      {/* Selection Status and Actions Bar - Only show background when rows are selected */}
       {enableSelection && (
-        <div className="border-b border-gray-300 bg-[#E8F4FD] px-6 py-3">
+        <div
+          className={`border-b border-gray-300 px-6 py-3 ${
+            hasSelection ? 'bg-[#E8F4FD]' : 'bg-white'
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 text-sm">
               {hasSelection ? (
@@ -211,12 +253,12 @@ export function GCGrid<T extends Record<string, any>>({
                 <span className="text-gray-600">Nothing Selected</span>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               {onExport && (
                 <button
                   onClick={onExport}
                   disabled={!hasSelection}
-                  className="flex items-center gap-1.5 rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center gap-1.5 text-sm font-medium text-[#015FA3] hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -233,7 +275,7 @@ export function GCGrid<T extends Record<string, any>>({
                 <button
                   onClick={onEdit}
                   disabled={!hasSelection}
-                  className="flex items-center gap-1.5 rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center gap-1.5 text-sm font-medium text-[#015FA3] hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -250,7 +292,7 @@ export function GCGrid<T extends Record<string, any>>({
                 <button
                   onClick={onDelete}
                   disabled={!hasSelection}
-                  className="flex items-center gap-1.5 rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center gap-1.5 text-sm font-medium text-[#015FA3] hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -265,7 +307,7 @@ export function GCGrid<T extends Record<string, any>>({
               )}
               <button
                 disabled={!hasSelection}
-                className="flex items-center gap-1.5 rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1 text-sm font-medium text-[#015FA3] hover:underline disabled:cursor-not-allowed disabled:opacity-50"
               >
                 More Actions
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,9 +467,7 @@ export function GCGrid<T extends Record<string, any>>({
                   >
                     1
                   </button>
-                  {currentPage > 3 && (
-                    <span className="px-2 text-sm text-gray-500">...</span>
-                  )}
+                  {currentPage > 3 && <span className="px-2 text-sm text-gray-500">...</span>}
                 </>
               )}
 
@@ -440,7 +480,10 @@ export function GCGrid<T extends Record<string, any>>({
                 </button>
               )}
 
-              <button className="rounded border border-[#015FA3] bg-[#015FA3] px-3 py-1.5 text-sm font-medium text-white">
+              <button
+                className="rounded border border-[#015FA3] px-3 py-1.5 text-sm font-medium text-white"
+                style={{ backgroundColor: PRIMARY_BLUE }}
+              >
                 {currentPage}
               </button>
 

@@ -69,6 +69,7 @@ const columns: Column<TableEntity>[] = [
 
 function App() {
   const [selectedItems, setSelectedItems] = useState<TableEntity[]>([]);
+  const [activeTab, setActiveTab] = useState("all");
 
   const handleExport = () => {
     console.log("Exporting selected items:", selectedItems);
@@ -92,7 +93,7 @@ function App() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">GiveCampus DataGrid</h1>
           <p className="mt-2 text-gray-600">
-            Production-ready data grid component matching exact design specifications
+            Clean, simple design matching mockup specifications
           </p>
         </div>
 
@@ -108,6 +109,14 @@ function App() {
           onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          tabs={[
+            { label: "All Results", value: "all" },
+            { label: "Fields", value: "fields" },
+            { label: "Draft", value: "draft" },
+            { label: "Archived", value: "archived" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
       </div>
     </div>
