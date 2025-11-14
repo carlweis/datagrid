@@ -1,111 +1,134 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { GCGrid } from "@/components/GCGrid";
 import type { Column } from "@/components/GCGrid";
 import "./App.css";
 
-interface SampleData {
+interface TableEntity {
   id: number;
   name: string;
-  email: string;
-  role: string;
+  dataType: string;
   status: string;
+  affiliation: string;
 }
 
-const sampleData: SampleData[] = [
-  { id: 1, name: "Alice Johnson", email: "alice@example.com", role: "Admin", status: "Active" },
-  { id: 2, name: "Bob Smith", email: "bob@example.com", role: "User", status: "Active" },
-  { id: 3, name: "Carol White", email: "carol@example.com", role: "User", status: "Inactive" },
-  { id: 4, name: "David Brown", email: "david@example.com", role: "Moderator", status: "Active" },
-  { id: 5, name: "Eve Davis", email: "eve@example.com", role: "User", status: "Active" },
-];
+// Generate sample data that matches the mockup
+const generateSampleData = (count: number): TableEntity[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i + 1,
+    name: "Table Cell",
+    dataType: "Table Cell",
+    status: "N/A",
+    affiliation: "N/A",
+  }));
+};
 
-const columns: Column<SampleData>[] = [
-  {
-    key: "id",
-    header: "ID",
-    accessor: "id",
-  },
+const sampleData = generateSampleData(3657);
+
+const columns: Column<TableEntity>[] = [
   {
     key: "name",
     header: "Name",
     accessor: "name",
   },
   {
-    key: "email",
-    header: "Email",
-    accessor: "email",
-  },
-  {
-    key: "role",
-    header: "Role",
-    render: (row) => (
-      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-        row.role === "Admin" ? "bg-purple-100 text-purple-800" :
-        row.role === "Moderator" ? "bg-blue-100 text-blue-800" :
-        "bg-gray-100 text-gray-800"
-      }`}>
-        {row.role}
-      </span>
-    ),
+    key: "dataType",
+    header: "Data Type",
+    accessor: "dataType",
   },
   {
     key: "status",
     header: "Status",
     render: (row) => (
-      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-        row.status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-      }`}>
-        {row.status}
-      </span>
+      <div className="flex items-center gap-1">
+        <span className="text-gray-900">{row.status}</span>
+      </div>
+    ),
+  },
+  {
+    key: "affiliation",
+    header: "Affiliation",
+    render: () => (
+      <div className="flex items-center gap-1.5">
+        <span className="inline-flex items-center rounded bg-gray-800 px-2 py-0.5 text-xs font-medium text-white">
+          Export
+        </span>
+        <span className="inline-flex items-center rounded bg-gray-800 px-2 py-0.5 text-xs font-medium text-white">
+          Delete
+        </span>
+      </div>
     ),
   },
 ];
 
 function App() {
-  const [selectedItems, setSelectedItems] = useState<SampleData[]>([]);
+  const [selectedItems, setSelectedItems] = useState<TableEntity[]>([]);
+  const [activeTab, setActiveTab] = useState("all");
+
+  const handleExport = () => {
+    console.log("Exporting selected items:", selectedItems);
+    alert(`Exporting ${selectedItems.length} items`);
+  };
+
+  const handleAdd = () => {
+    console.log("Add contributors clicked");
+    alert("Add contributors functionality");
+  };
+
+  const handleEdit = () => {
+    console.log("Editing selected items:", selectedItems);
+    alert(`Editing ${selectedItems.length} items`);
+  };
+
+  const handleDelete = () => {
+    console.log("Deleting selected items:", selectedItems);
+    if (confirm(`Are you sure you want to delete ${selectedItems.length} items?`)) {
+      alert("Items deleted");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="mx-auto max-w-6xl">
-        <h1 className="text-4xl font-bold text-gray-900">GiveCampus DataGrid</h1>
-        <p className="mt-4 text-lg text-gray-600">
-          A robust data grid component with selection support and proper error handling.
-        </p>
-
-        <div className="mt-8">
-          <GCGrid
-            data={sampleData}
-            columns={columns}
-            enableSelection={true}
-            onSelectionChange={setSelectedItems}
-          />
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">GiveCampus DataGrid</h1>
+          <p className="mt-2 text-gray-600">
+            A production-ready data grid component matching the design specifications
+          </p>
         </div>
 
+        <GCGrid
+          data={sampleData}
+          columns={columns}
+          title="Table Entities"
+          enableSelection={true}
+          enablePagination={true}
+          pageSize={10}
+          onSelectionChange={setSelectedItems}
+          onExport={handleExport}
+          onAdd={handleAdd}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          tabs={[
+            { label: "All Results", value: "all" },
+            { label: "Fields", value: "fields" },
+            { label: "Draft", value: "draft" },
+            { label: "Archived", value: "archived" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+
+        {/* Debug Info */}
         {selectedItems.length > 0 && (
-          <div className="mt-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h3 className="mb-2 font-semibold text-gray-900">Selected Items:</h3>
-            <ul className="space-y-1 text-sm text-gray-600">
-              {selectedItems.map((item) => (
-                <li key={item.id}>
-                  {item.name} ({item.email})
-                </li>
-              ))}
-            </ul>
+          <div className="mt-6 rounded-lg border border-gray-300 bg-white p-4">
+            <h3 className="mb-2 text-sm font-semibold text-gray-900">
+              Debug: Selected Items ({selectedItems.length})
+            </h3>
+            <p className="text-xs text-gray-600">
+              Check the console for full details of selected items
+            </p>
           </div>
         )}
-
-        <div className="mt-6">
-          <Button
-            onClick={() => {
-              console.log("Selected items:", selectedItems);
-              alert(`${selectedItems.length} items selected. Check console for details.`);
-            }}
-            disabled={selectedItems.length === 0}
-          >
-            Process Selected Items
-          </Button>
-        </div>
       </div>
     </div>
   );
