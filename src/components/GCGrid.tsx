@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useSelection } from '../hooks/useSelection';
 import { Button } from './ui/button';
 
@@ -68,7 +68,7 @@ export function GCGrid<T extends Record<string, any>>({
   });
 
   // Notify parent of selection changes
-  useMemo(() => {
+  useEffect(() => {
     if (onSelectionChange) {
       onSelectionChange(selection.getSelectedItems());
     }
