@@ -172,13 +172,16 @@ export function GCGrid<T extends Record<string, any>>({
               <button
                 key={tab.value}
                 onClick={() => onTabChange?.(tab.value)}
-                className={`relative border-b-2 pb-3 pt-4 text-sm font-medium transition-colors ${
+                className={`relative pb-3 pt-4 text-sm font-medium transition-colors ${
                   activeTab === tab.value
-                    ? 'border-[#015FA3] text-[#015FA3]'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    ? 'text-[#015FA3]'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 {tab.label}
+                {activeTab === tab.value && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#015FA3]" />
+                )}
               </button>
             ))}
           </div>
@@ -227,11 +230,11 @@ export function GCGrid<T extends Record<string, any>>({
         </div>
       </div>
 
-      {/* Selection Status and Actions Bar - Only show background when rows are selected */}
+      {/* Selection Status and Actions Bar */}
       {enableSelection && (
         <div
           className={`border-b border-gray-300 px-6 py-3 ${
-            hasSelection ? 'bg-[#E8F4FD]' : 'bg-white'
+            hasSelection ? 'bg-[#E8F4FD]' : 'bg-[#F5F5F5]'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -367,7 +370,7 @@ export function GCGrid<T extends Record<string, any>>({
                   </div>
                 </th>
               ))}
-              <th className="w-12"></th>
+              <th className="sticky right-0 w-12 bg-white shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)]"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
@@ -418,7 +421,9 @@ export function GCGrid<T extends Record<string, any>>({
                         {renderCellContent(row, column)}
                       </td>
                     ))}
-                    <td className="px-6 py-3 text-center">
+                    <td className={`sticky right-0 px-6 py-3 text-center shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.1)] ${
+                      isSelected ? 'bg-[#E8F4FD]' : 'bg-white'
+                    }`}>
                       <button className="text-gray-400 hover:text-gray-600">
                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
