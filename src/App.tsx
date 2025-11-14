@@ -1,4 +1,5 @@
-import './App.css'
+import { Button } from "@/components/ui/button";
+import "./App.css";
 
 function App() {
   return (
@@ -7,8 +8,9 @@ function App() {
       <p className="mt-4 text-lg">
         This is a demo application showcasing the GiveCampus DataGrid component.
       </p>
+      <Button className="mt-6">Start Demo</Button>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
