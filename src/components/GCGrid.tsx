@@ -50,6 +50,7 @@ export function GCGrid<T extends Record<string, any>>({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(pageSize);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
   // Default getRowId implementation with safety checks
   const getRowId = useCallback(
@@ -164,71 +165,86 @@ export function GCGrid<T extends Record<string, any>>({
         </div>
       </div>
 
-      {/* Tabs Section */}
+      {/* Tabs + Search */}
       {tabs && tabs.length > 0 && (
         <div className="border-b border-gray-300 bg-white px-6">
-          <div className="flex gap-6">
-            {tabs.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => onTabChange?.(tab.value)}
-                className={`relative pb-3 pt-4 text-sm font-medium transition-colors ${
-                  activeTab === tab.value
-                    ? 'text-[#015FA3]'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {tab.label}
-                {activeTab === tab.value && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#015FA3]" />
-                )}
-              </button>
-            ))}
+          <div className="flex items-end justify-between gap-6">
+            <div className="flex gap-6">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => onTabChange?.(tab.value)}
+                  className={`relative pb-3 pt-4 text-sm font-medium transition-colors ${
+                    activeTab === tab.value
+                      ? 'text-[#015FA3]'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {tab.label}
+                  {activeTab === tab.value && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#015FA3]" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-1 items-end justify-end pb-2 pt-3">
+              {searchFocused || searchValue ? (
+                <div className="relative w-full max-w-xl">
+                  <svg
+                    className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <input
+                    autoFocus
+                    type="search"
+                    value={searchValue}
+                    placeholder="Search"
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    className="w-full border-0 bg-transparent pb-1 pl-6 pr-8 text-sm text-gray-700 outline-none ring-0 focus:ring-0"
+                    style={{ borderBottom: '2px solid #015FA3' }}
+                  />
+                  {searchValue && (
+                    <button
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => setSearchValue('')}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 text-[#015FA3] hover:underline"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setSearchFocused(true)}
+                  className="flex items-center gap-2 pb-1 text-sm font-semibold text-[#015FA3] hover:underline"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  Search
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
-
-      {/* Search Bar */}
-      <div className="border-b border-gray-300 px-6 py-3">
-        <div className="flex items-center justify-end">
-          <div
-            className={`relative transition-all duration-200 ${
-              searchFocused ? 'w-full' : 'w-64'
-            }`}
-          >
-            <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            <input
-              type="search"
-              placeholder="Search"
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
-              className="w-full rounded border border-gray-300 py-2 pl-10 pr-10 text-sm focus:border-[#015FA3] focus:outline-none focus:ring-1 focus:ring-[#015FA3]"
-            />
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Selection Status and Actions Bar */}
       {enableSelection && (
@@ -447,18 +463,18 @@ export function GCGrid<T extends Record<string, any>>({
               <span className="font-semibold">{Math.min(endIndex, validData.length)}</span> of{' '}
               <span className="font-semibold">{validData.length.toLocaleString()}</span> Entities
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
-                className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="px-2 text-sm font-semibold text-[#015FA3] disabled:cursor-not-allowed disabled:text-gray-400"
               >
-                «
+                ««
               </button>
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="px-2 text-sm font-semibold text-[#015FA3] disabled:cursor-not-allowed disabled:text-gray-400"
               >
                 ‹
               </button>
@@ -468,7 +484,7 @@ export function GCGrid<T extends Record<string, any>>({
                 <>
                   <button
                     onClick={() => setCurrentPage(1)}
-                    className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                    className="px-2 text-sm font-semibold text-[#015FA3] hover:underline"
                   >
                     1
                   </button>
@@ -479,23 +495,20 @@ export function GCGrid<T extends Record<string, any>>({
               {currentPage > 1 && (
                 <button
                   onClick={() => setCurrentPage(currentPage - 1)}
-                  className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                  className="px-2 text-sm font-semibold text-[#015FA3] hover:underline"
                 >
                   {currentPage - 1}
                 </button>
               )}
 
-              <button
-                className="rounded border border-[#015FA3] px-3 py-1.5 text-sm font-medium text-white"
-                style={{ backgroundColor: PRIMARY_BLUE }}
-              >
+              <button className="rounded border border-gray-300 bg-white px-3 py-1 text-sm font-semibold text-gray-800 shadow-sm">
                 {currentPage}
               </button>
 
               {currentPage < totalPages && (
                 <button
                   onClick={() => setCurrentPage(currentPage + 1)}
-                  className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                  className="px-2 text-sm font-semibold text-[#015FA3] hover:underline"
                 >
                   {currentPage + 1}
                 </button>
@@ -508,7 +521,7 @@ export function GCGrid<T extends Record<string, any>>({
                   )}
                   <button
                     onClick={() => setCurrentPage(totalPages)}
-                    className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                    className="px-2 text-sm font-semibold text-[#015FA3] hover:underline"
                   >
                     {totalPages}
                   </button>
@@ -518,16 +531,16 @@ export function GCGrid<T extends Record<string, any>>({
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="px-2 text-sm font-semibold text-[#015FA3] disabled:cursor-not-allowed disabled:text-gray-400"
               >
                 ›
               </button>
               <button
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
-                className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="px-2 text-sm font-semibold text-[#015FA3] disabled:cursor-not-allowed disabled:text-gray-400"
               >
-                »
+                »»
               </button>
 
               <select
@@ -536,7 +549,7 @@ export function GCGrid<T extends Record<string, any>>({
                   setItemsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="ml-2 rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 focus:border-[#015FA3] focus:outline-none focus:ring-1 focus:ring-[#015FA3]"
+                className="ml-3 rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 focus:border-[#015FA3] focus:outline-none focus:ring-1 focus:ring-[#015FA3]"
               >
                 <option value="10">10</option>
                 <option value="25">25</option>

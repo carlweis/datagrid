@@ -51,10 +51,10 @@ const columns: Column<TableEntity>[] = [
     header: "Affiliation",
     render: () => (
       <div className="flex items-center gap-1.5">
-        <span className="inline-flex items-center rounded bg-gray-700 px-2.5 py-1 text-xs font-medium text-white">
+        <span className="inline-flex items-center rounded bg-[#4E4E4E] px-2.5 py-1 text-xs font-medium text-white">
           Badge
         </span>
-        <span className="inline-flex items-center rounded bg-gray-700 px-2.5 py-1 text-xs font-medium text-white">
+        <span className="inline-flex items-center rounded bg-[#4E4E4E] px-2.5 py-1 text-xs font-medium text-white">
           Badge
         </span>
       </div>
