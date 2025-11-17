@@ -134,6 +134,7 @@ export function GCGrid<T extends Record<string, any>>({
   );
 
   const hasSelection = selection.selectedRows.size > 0;
+  const isSearching = searchFocused || Boolean(searchValue);
 
   return (
     <div className="w-full border border-gray-300 bg-white">
@@ -168,64 +169,65 @@ export function GCGrid<T extends Record<string, any>>({
       {/* Tabs + Search */}
       {tabs && tabs.length > 0 && (
         <div className="border-b border-gray-300 bg-white px-6">
-          <div className="flex items-end justify-between gap-6">
-            <div className="flex gap-6">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => onTabChange?.(tab.value)}
-                  className={`relative pb-3 pt-4 text-sm font-medium transition-colors ${
-                    activeTab === tab.value
-                      ? 'text-[#015FA3]'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
+          {isSearching ? (
+            <div className="flex items-center pb-2 pt-3">
+              <div className="relative w-full">
+                <svg
+                  className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {tab.label}
-                  {activeTab === tab.value && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#015FA3]" />
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-1 items-end justify-end pb-2 pt-3">
-              {searchFocused || searchValue ? (
-                <div className="relative w-full max-w-xl">
-                  <svg
-                    className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  <input
-                    autoFocus
-                    type="search"
-                    value={searchValue}
-                    placeholder="Search"
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    onFocus={() => setSearchFocused(true)}
-                    onBlur={() => setSearchFocused(false)}
-                    className="w-full border-0 bg-transparent pb-1 pl-6 pr-8 text-sm text-gray-700 outline-none ring-0 focus:ring-0"
-                    style={{ borderBottom: '2px solid #015FA3' }}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
-                  {searchValue && (
-                    <button
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => setSearchValue('')}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 text-[#015FA3] hover:underline"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ) : (
+                </svg>
+                <input
+                  autoFocus
+                  type="search"
+                  value={searchValue}
+                  placeholder="Search"
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  className="w-full border-0 bg-transparent pb-1 pl-6 pr-8 text-sm text-gray-700 outline-none ring-0 focus:ring-0"
+                />
+                {searchValue && (
+                  <button
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => setSearchValue('')}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-[#015FA3] hover:underline"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-end justify-between gap-6">
+              <div className="flex gap-6">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => onTabChange?.(tab.value)}
+                    className={`relative pb-3 pt-4 text-sm font-medium transition-colors ${
+                      activeTab === tab.value
+                        ? 'text-[#015FA3]'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    {tab.label}
+                    {activeTab === tab.value && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#015FA3]" />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-1 items-end justify-end pb-2 pt-3">
                 <button
                   onClick={() => setSearchFocused(true)}
                   className="flex items-center gap-2 pb-1 text-sm font-semibold text-[#015FA3] hover:underline"
@@ -240,9 +242,9 @@ export function GCGrid<T extends Record<string, any>>({
                   </svg>
                   Search
                 </button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
