@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelection } from '../hooks/useSelection';
 
 export interface Column<T> {
@@ -51,6 +51,7 @@ export function GCGrid<T extends Record<string, any>>({
   const [itemsPerPage, setItemsPerPage] = useState(pageSize);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   // Default getRowId implementation with safety checks
   const getRowId = useCallback(
@@ -186,13 +187,23 @@ export function GCGrid<T extends Record<string, any>>({
                   />
                 </svg>
                 <input
+                  ref={searchInputRef}
                   autoFocus
-                  type="search"
+                  type="text"
+                  role="searchbox"
+                  aria-label="Search"
                   value={searchValue}
                   placeholder="Search"
                   onChange={(e) => setSearchValue(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setSearchFocused(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setSearchValue('');
+                      setSearchFocused(false);
+                      searchInputRef.current?.blur();
+                    }
+                  }}
                   className="w-full border-0 bg-transparent pb-1 pl-6 pr-8 text-sm text-gray-700 outline-none ring-0 focus:ring-0"
                 />
                 {searchValue && (
