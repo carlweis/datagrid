@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# GiveCampus DataGrid Demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project now ships a reusable GCGrid plus a suite of shadcn-style cell components you can drop into any column definition. The demo (`src/App.tsx`) exercises every cell type with async and accessibility behaviors.
 
-Currently, two official plugins are available:
+## Cell Components (in `src/components/GCGrid/cells`)
+- `TextCell` – simple text with optional truncation.  
+  ```tsx
+  <TextCell value={info.getValue()} truncate />
+  ```
+- `LinkCell` – blue link with optional external target.  
+  ```tsx
+  <LinkCell value="Details" href={`/entity/${info.row.original.id}`} />
+  ```
+- `CheckboxCell` – selection checkbox (indeterminate supported).  
+  ```tsx
+  <CheckboxCell checked={info.row.getIsSelected()} onChange={info.row.getToggleSelectedHandler()} />
+  ```
+- `BadgeCell` – status/category badges with variants (`default | secondary | outline | destructive`).  
+  ```tsx
+  <BadgeCell value={status} variant="secondary" />
+  ```
+- `SwitchCell` – async-friendly toggle switch with loading and `role="switch"`.  
+  ```tsx
+  <SwitchCell checked={info.getValue()} onCheckedChange={setActive} />
+  ```
+- `ButtonCell` – action button with async loading and optional icon.  
+  ```tsx
+  <ButtonCell label="Edit" onClick={() => handleEdit(info.row.original)} variant="outline" />
+  ```
+- `MenuCell` – ellipsis dropdown with separators and destructive styling.  
+  ```tsx
+  <MenuCell actions={[{ label: "Edit", onClick: onEdit }, { label: "Delete", destructive: true, onClick: onDelete }]} />
+  ```
+- `ToolbarCell` – row of icon buttons (tooltips, destructive, loading).  
+  ```tsx
+  <ToolbarCell actions={[{ icon: Star, onClick: onStar }]} />
+  ```
+- `GripperCell` – drag handle (six dots) for reordering.  
+  ```tsx
+  <GripperCell />
+  ```
+- `CustomCell` – simple wrapper for arbitrary content.  
+  ```tsx
+  <CustomCell><Avatar /> <span>{info.getValue()}</span></CustomCell>
+  ```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Barrel export: `import { GCGrid, TextCell, LinkCell, ... } from "@/components/GCGrid";`
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Example usage (from `src/App.tsx`)
+```tsx
+const columns: Column<Entity>[] = [
+  { key: "name", header: "Name", render: (row) => <LinkCell value={row.name} href={`/entity/${row.id}`} /> },
+  { key: "status", header: "Status", render: (row) => <BadgeCell value={row.status} /> },
+  { key: "active", header: "Active", render: (row) => <SwitchCell checked={row.active} onCheckedChange={(v) => toggle(row.id, v)} /> },
+  { key: "actions", header: "Actions", render: (row) => <ToolbarCell actions={[{ icon: Pencil, onClick: () => onEdit(row) }]} /> },
+  { key: "menu", header: "Menu", render: (row) => <MenuCell actions={[{ label: "Delete", destructive: true, onClick: () => onDelete(row.id) }]} /> },
+];
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Run the demo:
+```bash
+npm install
+npm run dev
 ```
+
+The demo shows:
+- keyboard-friendly search toggle (Esc closes, focus handling)
+- pagination with only the active page outlined
+- interactive cells with loading/error handling hooks

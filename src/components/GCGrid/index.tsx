@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelection } from '../hooks/useSelection';
+import { useSelection } from '../../hooks/useSelection';
 
 export interface Column<T> {
   key: string;
@@ -576,3 +576,5 @@ export function GCGrid<T extends Record<string, any>>({
     </div>
   );
 }
+
+export * from './cells';
